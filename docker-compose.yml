@@ -1,0 +1,94 @@
+####
+## dibimbing.id - Case Study ETL
+## Mario Caesar // caesarmario87@gmail.com
+####
+
+name: dibimbing-case-study-etl
+
+services:
+  # ------------------------------------
+  # Postgres
+  # ------------------------------------
+  postgres:
+    image: postgres:13
+    container_name: pg_dibimbing
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_HOST_PORT}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  # ------------------------------------
+  # MinIO
+  # ------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: minio_dibimbing
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
+    env_file:
+      - .env
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "${MINIO_API_HOST_PORT}:9000" 
+      - "${MINIO_CONSOLE_HOST_PORT}:${MINIO_CONSOLE_PORT}"
+    volumes:
+      - minio_data:/data
+
+  # ------------------------------------
+  # Airflow
+  # ------------------------------------
+  airflow:
+    image: apache/airflow:3.0.2-python3.11
+    container_name: airflow_dibimbing
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO
+      PYTHONPATH: /opt/project
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+      - ./:/opt/project:delegated
+    working_dir: /opt/project
+    ports:
+      - "${AIRFLOW_HOST_PORT}:8080"
+    depends_on:
+      - postgres
+      - minio
+    command: >
+      bash -lc "pip install --no-cache-dir -r /opt/project/requirements.txt
+      && exec airflow standalone"
+
+  # ------------------------------------
+  # Pyworker
+  # ------------------------------------
+  pyworker:
+    image: python:3.11-slim
+    container_name: pyworker_dibimbing
+    working_dir: /opt/project
+    volumes:
+      - ./:/opt/project
+    depends_on:
+      - postgres
+      - minio
+    env_file:
+      - .env
+    entrypoint: >
+      bash -lc "pip install --no-cache-dir -r /opt/project/requirements.txt
+      && tail -f /dev/null"
+
+volumes:
+  pg_data:
+  minio_data:

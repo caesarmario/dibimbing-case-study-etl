@@ -1,0 +1,6 @@
+.env
+*.log
+*.py.log
+airflow/logs/
+**/*.py[cod]
+dev_notes.txt
