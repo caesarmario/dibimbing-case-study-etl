@@ -6,3 +6,4 @@ airflow/logs/
 **/*.py[cod]
 *$py.class
 dev_notes.txt
+variables.json

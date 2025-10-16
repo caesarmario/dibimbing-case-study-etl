@@ -42,33 +42,10 @@ services:
       - minio_data:/data
 
   # ------------------------------------
-  # MinIO Client
-  # ------------------------------------
-  mc:
-    image: minio/mc:latest
-    container_name: minio_mc_init
-    depends_on:
-      minio:
-        condition: service_healthy
-    env_file:
-      - .env
-    entrypoint: >
-      /bin/sh -c "
-      until (curl -fsS http://minio:9000/minio/health/ready >/dev/null); do
-        echo 'waiting for minio...'; sleep 2;
-      done &&
-      mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
-      mc mb -p local/${MINIO_BUCKET_RAW} || true &&
-      mc mb -p local/${MINIO_BUCKET_STAGING} || true &&
-      echo 'MinIO buckets ensured.' &&
-      tail -f /dev/null
-      "
-
-  # ------------------------------------
   # Airflow
   # ------------------------------------
   airflow:
-    image: apache/airflow:3.0.2-python3.11
+    image: apache/airflow:3.1.0-python3.11
     container_name: airflow_dibimbing
     env_file:
       - .env
@@ -78,7 +55,7 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       AIRFLOW__LOGGING__LOGGING_LEVEL: INFO
-      PYTHONPATH: /opt/project
+      PYTHONPATH: /opt/project:/opt/project/scripts
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
@@ -108,6 +85,8 @@ services:
       - minio
     env_file:
       - .env
+    environment:
+      PYTHONPATH: /opt/project:/opt/project/scripts
     entrypoint: >
       bash -lc "pip install --no-cache-dir -r /opt/project/requirements.txt
       && tail -f /dev/null"
