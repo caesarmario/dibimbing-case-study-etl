@@ -1,6 +1,6 @@
 ####
 ## dibimbing.id - Case Study ETL
-## Mario Caesar // caesarmario87@gmail.com
+## Mario Caesar // linkedin.com/in/caesarmario
 ## -- DAG Load Parquet (staging) to Postgres L1
 ####
 
@@ -11,6 +11,7 @@ from airflow import DAG
 from airflow.sdk import timezone as tz
 from airflow.sdk import Variable
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 from scripts.load_parquet_to_postgres_l1 import run as load_to_l1
 
@@ -36,6 +37,7 @@ with DAG(
     max_active_runs=1,
     default_args=default_args,
     tags=["weather", "open-meteo", "staging", "l1", "postgres"],
+    template_searchpath=["/opt/project/scripts/sql"],
 ) as dag:
 
     def _task_load(ds, dag_run=None, **_):
@@ -57,10 +59,16 @@ with DAG(
             object_key_staging=object_key_staging,
         )
 
+    create_schema = SQLExecuteQueryOperator(
+        task_id="create_schema",
+        conn_id="postgres_default",
+        sql="create_schema.sql",
+    )
+
     load_parquet_to_l1 = PythonOperator(
         task_id="load_parquet_to_postgres_l1",
         python_callable=_task_load,
         execution_timeout=timedelta(minutes=10),
     )
 
-    load_parquet_to_l1
+    load_parquet_to_l1 >> create_schema

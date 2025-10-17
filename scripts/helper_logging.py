@@ -1,6 +1,6 @@
 ####
 ## dibimbing.id - Case Study ETL
-## Mario Caesar // caesarmario87@gmail.com
+## Mario Caesar // linkedin.com/in/caesarmario
 ## -- Python file for logging purposes
 ####
 

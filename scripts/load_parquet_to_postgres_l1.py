@@ -1,6 +1,6 @@
 ####
 ## dibimbing.id - Case Study ETL
-## Mario Caesar // caesarmario87@gmail.com
+## Mario Caesar // linkedin.com/in/caesarmario
 ## -- Load staging Parquet --> Postgres L1
 ####
 
@@ -181,7 +181,7 @@ def run(
     df = _normalize_df_for_pg(df)
 
     # 3) load to Postgres (schema-qualified)
-    table_fqdn = _qual_table(pg_cfg)                # e.g., weather.l1_weather_hourly
+    table_fqdn = _qual_table(pg_cfg)
     schema     = pg_cfg.get("schema", "public")
 
     conn = _connect_pg(pg_cfg)

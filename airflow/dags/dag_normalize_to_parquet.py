@@ -1,7 +1,7 @@
 ####
 ## dibimbing.id - Case Study ETL
-## Mario Caesar // caesarmario87@gmail.com
-## -- DAG 01: Normalize Open-Meteo RAW JSON → Parquet (staging)
+## Mario Caesar // linkedin.com/in/caesarmario
+## -- DAG Normalize Open-Meteo RAW JSON → Parquet (staging)
 ####
 
 from datetime import timedelta
@@ -14,8 +14,8 @@ from airflow.providers.standard.operators.python import PythonOperator
 from airflow.models import TaskInstance
 from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 
-
 from scripts.normalize_open_meteo_to_parquet import run as normalize_to_parquet
+
 
 DAG_ID = "etl_open_meteo_json_to_parquet"
 
@@ -75,7 +75,6 @@ with DAG(
         wait_for_completion=False,
         conf={
             "ds": "{{ ds }}",
-            # tarik object key hasil task normalize (return value)
             "object_key_staging": "{{ ti.xcom_pull(task_ids='normalize_to_parquet') }}",
         },
         doc_md="Trigger DAG Loader L1 dengan conf: ds & object_key_staging (hasil normalize).",
