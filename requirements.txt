@@ -5,4 +5,3 @@ psycopg2-binary==2.9.9
 minio>=7.1.12
 apache-airflow-providers-postgres
 apache-airflow-providers-common-sql
-apache-airflow-providers-postgres
