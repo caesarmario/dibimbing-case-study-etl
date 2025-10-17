@@ -12,6 +12,8 @@ from airflow.sdk import timezone as tz
 from airflow.sdk import Variable
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.models import TaskInstance
+from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
+
 
 from scripts.normalize_open_meteo_to_parquet import run as normalize_to_parquet
 
@@ -66,4 +68,17 @@ with DAG(
         execution_timeout=timedelta(minutes=5),
     )
 
-    normalize
+    trigger_load_l1 = TriggerDagRunOperator(
+        task_id="trigger_load_parquet_to_postgres_l1",
+        trigger_dag_id="etl_open_meteo_parquet_to_postgres_l1",
+        reset_dag_run=True,
+        wait_for_completion=False,
+        conf={
+            "ds": "{{ ds }}",
+            # tarik object key hasil task normalize (return value)
+            "object_key_staging": "{{ ti.xcom_pull(task_ids='normalize_to_parquet') }}",
+        },
+        doc_md="Trigger DAG Loader L1 dengan conf: ds & object_key_staging (hasil normalize).",
+    )
+
+    normalize >> trigger_load_l1
