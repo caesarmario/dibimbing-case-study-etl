@@ -37,7 +37,7 @@ with DAG(
     max_active_runs=1,
     default_args=default_args,
     tags=["weather", "open-meteo", "staging", "l1", "postgres"],
-    template_searchpath=["/opt/project/scripts/sql"],
+    template_searchpath=["/opt/project/scripts/sql/l1_tables"],
 ) as dag:
 
     def _task_load(ds, dag_run=None, **_):

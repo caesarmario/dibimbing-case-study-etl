@@ -20,14 +20,14 @@ default_args = {
 
 with DAG(
     dag_id=DAG_ID,
-    description="Build/Upsert L2 (weather.l2_weather_hourly) dari L1 via SQL (idempotent)",
+    description="Build/Upsert L2 (weather.l2_weather_hourly) from L1 via SQL (idempotent)",
     start_date=tz.datetime(2025, 10, 1, 0, 0, 0),
     schedule="0 1 * * *",
     catchup=False,
     max_active_runs=1,
     default_args=default_args,
     tags=["weather", "open-meteo", "l2", "sql"],
-    template_searchpath=["/opt/project/scripts/sql"],
+    template_searchpath=["/opt/project/scripts/sql/l2_tables"],
 ) as dag:
 
     create_l2 = SQLExecuteQueryOperator(
