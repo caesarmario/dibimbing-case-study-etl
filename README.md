@@ -52,6 +52,7 @@ Open-Meteo API
                                    └─(Load)→ Postgres L1 (weather.l1_weather_hourly)
                                                 └─(SQL)→ Postgres L2 (weather.l2_weather_hourly)
 ```
+<p align="center"> <img src="assets/pipeline_architecture.png" alt="DQ Dashboard" width="85%"> </p>
 
 **DAGs**
 
@@ -59,6 +60,8 @@ Open-Meteo API
 2. `etl_open_meteo_json_to_parquet` (Normalize; optionally triggered from 1)
 3. `etl_open_meteo_parquet_to_postgres_l1` (Load L1; creates schema/table if needed)
 4. `etl_open_meteo_l1_to_l2_sql` (SQL-only Upsert L2 using `.sql` files)
+
+<p align="center"> <img src="assets/dag_architecture.png" alt="DQ Dashboard" width="85%"> </p>
 
 ## Repository Structure
 
